@@ -86,19 +86,6 @@
 
             }
 
-
-            // Clear Chat
-            function clearChat() {
-
-                var msg = $("#divChatWindow").html();
-
-                if (msg.length > 0) {
-                    chatHub.server.clearTimeout();
-                    $('#divChatWindow').html('');
-
-                }
-            }
-
             // Send Button Click Event
             $('#btnSendMsg').click(function () {
 
@@ -128,7 +115,7 @@
                 
                     $("#dropdownMenu2Text").text($(this).text());
                     $("#dropdownMenu2Text").val($(this).text());
-                    chatHub.server.loadAllUsers();
+                    chatHub.server.loadAllUsers(name);
                });
 
             });
@@ -271,9 +258,32 @@
             }
 
 
-            chatHub.client.loadAllUsers = function (users) {
-                console.log("load all users");
-                console.log(users);
+            chatHub.client.loadAllUsers = function (users, photos) {
+                var div = document.getElementById("divusers");
+                while (div.firstChild) {
+                    div.removeChild(div.firstChild);
+                }
+                var i;
+                for (i = 0; i < users.length; i++) {
+
+                    code = $('<li class="left clearfix" id="li' + users[i] + '">' + 
+                        '<span class="chat-img pull-left">' + 
+                        '<img src="' + photos[i] + '" alt="User Avatar" class="img-circle img-sm">' +
+                        '</span>' + 
+                        '<div class="chat-body clearfix"> <div class="header_sec"> <strong class="primary-font">' + users[i] + '</strong>' +
+                        '</div> </div></li>');
+
+                    var UserLink = $('<a id="' + users[i] + '" class="user" >' + users[i] + '<a>');
+                    $(code).click(function () {
+
+                        var id = $(UserLink).attr('id');
+
+                        OpenPrivateChatBox(chatHub, id, ctrId, name);
+
+                    });
+
+                    $("#divusers").append(code);
+                }
             }
            
         }
@@ -291,7 +301,7 @@
 
             var userId = $('#hdId').val();
 
-            var code, Clist;
+            var code;
             if (userId == id) {
                 return;
             }
@@ -303,16 +313,6 @@
                 '<div class="chat-body clearfix"> <div class="header_sec"> <strong class="primary-font">' + name + '</strong>' +
                 '<strong class="pull-right">' + 
                 date + '</strong> </div> </div></li>');
-
-            Clist = $(
-                '<li>' +
-                '<a href="#">' +
-                '<img class="contacts-list-img" src="' + UserImage + '" alt="User Image" />' +
-
-                ' <div class="contacts-list-info">' +
-                '<span class="contacts-list-name" id="' + id + '">' + name + ' <small class="contacts-list-date pull-right">' + date + '</small> </span>' +
-                ' <span class="contacts-list-msg">How have you been? I was...</span></div></a > </li >');
-
 
             var UserLink = $('<a id="' + id + '" class="user" >' + name + '<a>');
             $(code).click(function () {
@@ -326,24 +326,8 @@
                 }
 
             });
-
-            var link = $('<span class="contacts-list-name" id="' + id + '">');
-            $(Clist).click(function () {
-
-                var id = $(link).attr('id');
-
-                if (userId != id) {
-                    var ctrId = 'private_' + id;
-                    OpenPrivateChatBox(chatHub, id, ctrId, name);
-
-                }
-
-            });
             
-
             $("#divusers").append(code);
-
-            $("#ContactList").append(Clist);
 
         }
 
@@ -538,7 +522,7 @@
         </div>
     </div>
     <script src="Scripts/bootstrap.min.js"></script>
-<script src="https://use.fontawesome.com/45e03a14ce.js"></script>
+<%--<script src="https://use.fontawesome.com/45e03a14ce.js"></script>--%>
 <div class="main_section">
 <div class="container">
 <div class="chat_container">

@@ -99,10 +99,22 @@ namespace SignalRChat
             
         }
 
-        public void LoadAllUsers()
+        public void LoadAllUsers(string username)
         {
-            var users = ConnC.ExecuteQuery("SELECT Username FROM Users", 1);
-            Clients.Caller.loadAllUsers(users);
+            var data = ConnC.ExecuteQuery("SELECT Username, Photo FROM Users WHERE Username <> '" + username + "'", 2);
+            int count = data.Count;
+            int j = 0;
+            string[] users = new string[count / 2];
+            string[] photos = new string[count / 2];
+            for (int i = 0; i < count; i += 2)
+            {
+                users[j] = data[i];
+                string path = data[i + 1];
+                photos[j] = "images/DP/" + (path.Equals(string.Empty) ? "dummy.png" : path);
+                j++;
+            }
+
+            Clients.Caller.loadAllUsers(users, photos);
         }
 
         public void LoadAllGroups(string username)
