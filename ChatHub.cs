@@ -94,9 +94,20 @@ namespace SignalRChat
             return base.OnDisconnected(stopCalled);
         }
 
-        public void LoadOnlineUsers()
+        public void LoadOnlineUsers(string username)
         {
-            
+            string[] users = new string[ConnectedUsers.Count-1];
+            string[] photos = new string[ConnectedUsers.Count-1];
+            int j = 0;
+            foreach (Users user in ConnectedUsers)
+            {
+                if (username == user.UserName)
+                    continue;
+                users[j] = user.UserName;
+                photos[j] = user.UserImage;
+                j++;
+            }
+            Clients.Caller.loadAllUsers(users, photos);
         }
 
         public void LoadAllUsers(string username)
@@ -119,8 +130,18 @@ namespace SignalRChat
 
         public void LoadAllGroups(string username)
         {
-            var groups = ConnC.ExecuteQuery("SELECT Name FROM Groups g JOIN UsersInGroups ug ON g.ID = ug.GroupID WHERE Username = '" + username + "'", 1);
-            Clients.Caller.loadAllUsers(groups);
+            var data = ConnC.ExecuteQuery("SELECT Name, g.ID FROM Groups g JOIN UsersInGroups ug ON g.ID = ug.GroupID WHERE Username = '" + username + "'", 2);
+
+            int count = data.Count;
+            string[] groups = new string[count / 2];
+            string[] ids = new string[count / 2];
+            for (int i = 0; i < count/2; i++)
+            {
+                groups[i] = data[i*2];
+                ids[i] = data[i * 2 + 1];
+            }
+
+            Clients.Caller.loadAllGroups(groups, ids);
         }
 
         public void SendPrivateMessage(string toUserId, string message)

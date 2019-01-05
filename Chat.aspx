@@ -125,6 +125,7 @@
                 
                     $("#dropdownMenu2Text").text($(this).text());
                     $("#dropdownMenu2Text").val($(this).text());
+                    chatHub.server.loadOnlineUsers(name);
                 
                });
 
@@ -252,9 +253,29 @@
 
             
         
-            chatHub.client.loadAllGroups = function (groups) {
-                console.log("load all groups");
-                console.log(groups);
+            chatHub.client.loadAllGroups = function (groups, ids) {
+                var div = document.getElementById("divusers");
+                while (div.firstChild) {
+                    div.removeChild(div.firstChild);
+                }
+                var i;
+                for (i = 0; i < groups.length; i++) {
+
+                    code = $('<li class="left clearfix" id="li' + ids[i] + '">' + 
+                        '<div class="chat-body clearfix"> <div class="header_sec"> <strong class="primary-font">' + groups[i] + '</strong>' +
+                        '</div> </div></li>');
+
+                    var GroupLink = $('<a id="' + ids[i] + '" class="user" >' + groups[i] + '<a>');
+                    $(code).click(function () {
+
+                        var id = $(GroupLink).attr('id');
+
+                        OpenPrivateChatBox(chatHub, id, ctrId, name);
+
+                    });
+
+                    $("#divusers").append(code);
+                }
             }
 
 
