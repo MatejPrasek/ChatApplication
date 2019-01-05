@@ -153,10 +153,10 @@
                 $('#spanUser').html(userName);
 
                 // Add All Users
-                for (i = 0; i < allUsers.length; i++) {
+                //for (i = 0; i < allUsers.length; i++) {
 
-                    AddUser(chatHub, allUsers[i].ConnectionId, allUsers[i].UserName, allUsers[i].UserImage, allUsers[i].LoginTime);
-                }
+                //    AddUser(chatHub, allUsers[i].ConnectionId, allUsers[i].UserName, allUsers[i].UserImage, allUsers[i].LoginTime);
+                //}
 
                 // Add Existing Messages
                 for (i = 0; i < messages.length; i++) {
@@ -166,23 +166,28 @@
             }
 
             // On New User Connected
-            chatHub.client.onNewUserConnected = function (id, name, UserImage, loginDate) {
-                AddUser(chatHub, id, name, UserImage, loginDate);
+            chatHub.client.onNewUserConnected = function (id, userName, UserImage, loginDate) {
+                //AddUser(chatHub, id, userName, UserImage, loginDate);
+                var disc = $('<div class="disconnect">"' + userName + '" connected.</div>');
+
+                $(disc).hide();
+                $('#notificationConnected').prepend(disc);
+                $(disc).fadeIn(200).delay(2000).fadeOut(200);
             }
 
             // On User Disconnected
             chatHub.client.onUserDisconnected = function (id, userName) {
 
-                $('#li' + id).remove();
+                //$('#li' + id).remove();
 
-                var ctrId = 'private_' + id;
-                $('#' + ctrId).remove();
+                //var ctrId = 'private_' + id;
+                //$('#' + ctrId).remove();
 
 
                 var disc = $('<div class="disconnect">"' + userName + '" disconnected.</div>');
 
                 $(disc).hide();
-                $('#divusers').prepend(disc);
+                $('#notificationDisconnected').prepend(disc);
                 $(disc).fadeIn(200).delay(2000).fadeOut(200);
 
             }
@@ -546,6 +551,8 @@
 <%--<script src="https://use.fontawesome.com/45e03a14ce.js"></script>--%>
 <div class="main_section">
 <div class="container">
+    <div id="notificationDisconnected" class="bg-danger text-center"></div>
+    <div id="notificationConnected" class="bg-success text-center"></div>
 <div class="chat_container">
 <div class="col-sm-3 chat_sidebar">
     <div class="row">
