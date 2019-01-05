@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -92,6 +92,23 @@ namespace SignalRChat
 
             }
             return base.OnDisconnected(stopCalled);
+        }
+
+        public void LoadOnlineUsers()
+        {
+            
+        }
+
+        public void LoadAllUsers()
+        {
+            var users = ConnC.ExecuteQuery("SELECT Username FROM Users", 1);
+            Clients.Caller.loadAllUsers(users);
+        }
+
+        public void LoadAllGroups(string username)
+        {
+            var groups = ConnC.ExecuteQuery("SELECT Name FROM Groups g JOIN UsersInGroups ug ON g.ID = ug.GroupID WHERE Username = '" + username + "'", 1);
+            Clients.Caller.loadAllUsers(groups);
         }
 
         public void SendPrivateMessage(string toUserId, string message)

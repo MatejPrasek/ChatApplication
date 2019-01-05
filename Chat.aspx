@@ -1,4 +1,4 @@
-<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="Chat.aspx.cs" Inherits="SignalRChat.Chat" %>
+﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="Chat.aspx.cs" Inherits="SignalRChat.Chat" %>
 
 <!DOCTYPE html>
 
@@ -87,17 +87,17 @@
             }
 
 
-        // Clear Chat
-        function ClearChat() {
+            // Clear Chat
+            function clearChat() {
 
-            var msg = $("#divChatWindow").html();
+                var msg = $("#divChatWindow").html();
 
-            if (msg.length > 0) {
-                chatHub.server.clearTimeout();
-                $('#divChatWindow').html('');
+                if (msg.length > 0) {
+                    chatHub.server.clearTimeout();
+                    $('#divChatWindow').html('');
 
+                }
             }
-        }
 
             // Send Button Click Event
             $('#btnSendMsg').click(function () {
@@ -120,6 +120,37 @@
                 if (e.which == 13) {
                     $('#btnSendMsg').click();
                 }
+            });
+
+             // Changing text of dropdown
+            $(function () {
+                $("#allUsers").click(function () {
+                
+                    $("#dropdownMenu2Text").text($(this).text());
+                    $("#dropdownMenu2Text").val($(this).text());
+                    chatHub.server.loadAllUsers();
+               });
+
+            });
+
+            $(function () {
+                $("#onlineUsers").click(function () {
+                
+                    $("#dropdownMenu2Text").text($(this).text());
+                    $("#dropdownMenu2Text").val($(this).text());
+                
+               });
+
+            });
+
+            $(function () {
+                $("#myGroups").click(function () {
+                
+                    $("#dropdownMenu2Text").text($(this).text());
+                    $("#dropdownMenu2Text").val($(this).text());
+                    chatHub.server.loadAllGroups(name);
+               });
+
             });
         }
 
@@ -232,7 +263,22 @@
                 });
             }
 
+            
+        
+            chatHub.client.loadAllGroups = function (groups) {
+                console.log("load all groups");
+                console.log(groups);
+            }
+
+
+            chatHub.client.loadAllUsers = function (users) {
+                console.log("load all users");
+                console.log(users);
+            }
+           
         }
+
+
 
         function GetCurrentDateTime(now) {
 
@@ -413,6 +459,7 @@
             $('#PriChatDiv').append($div);
         }
 
+
     </script>
 
 </head>
@@ -500,35 +547,18 @@
         <div class="dropdown all_conversation">
             <button class="dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 <i class="fa fa-weixin" aria-hidden="true"></i>
-                All Conversations
+                <span id="dropdownMenu2Text"> Online users </span>
                 <span class="caret pull-right"></span>
             </button>
             <ul class="dropdown-menu" aria-labelledby="dropdownMenu2">
                 <li>
-                    <a href="#"> All Conversation </a>
-                    <ul class="sub_menu_ list-unstyled">
-                        <li>
-                            <a href="#"> All Conversation </a>
-                        </li>
-                        <li>
-                            <a href="#">Another action</a>
-                        </li>
-                        <li>
-                            <a href="#">Something else here</a>
-                        </li>
-                        <li>
-                            <a href="#">Separated link</a>
-                        </li>
-                    </ul>
+                    <a href="#" id="onlineUsers"> Online users </a>
                 </li>
                 <li>
-                    <a href="#">Another action</a>
+                    <a href="#" id="allUsers"> All users </a>
                 </li>
                 <li>
-                    <a href="#">Something else here</a>
-                </li>
-                <li>
-                    <a href="#">Separated link</a>
+                    <a href="#" id="myGroups"> My groups </a>
                 </li>
             </ul>
         </div>
