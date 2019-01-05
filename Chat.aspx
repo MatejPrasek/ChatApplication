@@ -1,4 +1,4 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="Chat.aspx.cs" Inherits="SignalRChat.Chat" %>
+<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="Chat.aspx.cs" Inherits="SignalRChat.Chat" %>
 
 <!DOCTYPE html>
 
@@ -88,7 +88,7 @@
 
 
         // Clear Chat
-        $('#btnClearChat').click(function () {
+        function ClearChat() {
 
             var msg = $("#divChatWindow").html();
 
@@ -97,7 +97,7 @@
                 $('#divChatWindow').html('');
 
             }
-        });
+        }
 
             // Send Button Click Event
             $('#btnSendMsg').click(function () {
@@ -247,83 +247,53 @@
 
             var code, Clist;
             if (userId == id) {
-
-                //code = $('<div class="box-comment">' +
-                //    '<img class="img-circle img-sm" src="' + UserImage + '" alt="User Image" />' +
-                //    ' <div class="comment-text">' +
-                //    '<span class="username">' + name + '<span class="text-muted pull-right">' + date + '</span>  </span></div></div>');
-
-                code = $('<li class="left clearfix">' + 
-                    '<span class="chat-img pull-left">' + 
-                    '<img src="' + UserImage + '" alt="User Avatar" class="img-circle img-sm">' +
-                    '</span>' + 
-                    '<div class="chat-body clearfix"> <div class="header_sec"> <strong class="primary-font">' + name + '</strong>' +
-                    '<strong class="pull-right">' + 
-                    date + '</strong> </div> </div> </li>');
-
-
-                Clist = $(
-                    '<li style="background:#494949;">' +
-                    '<a href="#">' +
-                    '<img class="contacts-list-img" src="' + UserImage + '" alt="User Image" />' +
-
-                    ' <div class="contacts-list-info">' +
-                    ' <span class="contacts-list-name" id="' + id + '">' + name + ' <small class="contacts-list-date pull-right">' + date + '</small> </span>' +
-                    ' <span class="contacts-list-msg">How have you been? I was...</span></div></a > </li >');
-
+                return;
             }
-            else {
+            
+            code = $('<li class="left clearfix" id="li' + id + '">' + 
+                '<span class="chat-img pull-left">' + 
+                '<img src="' + UserImage + '" alt="User Avatar" class="img-circle img-sm">' +
+                '</span>' + 
+                '<div class="chat-body clearfix"> <div class="header_sec"> <strong class="primary-font">' + name + '</strong>' +
+                '<strong class="pull-right">' + 
+                date + '</strong> </div> </div></li>');
 
-                //code = $('<div class="box-comment" id="Div' + id + '">' +
-                //    '<img class="img-circle img-sm" src="' + UserImage + '" alt="User Image" />' +
-                //    ' <div class="comment-text">' +
-                //    '<span class="username">' + '<a id="' + id + '" class="user" >' + name + '<a>' + '<span class="text-muted pull-right">' + date + '</span>  </span></div></div>');
+            Clist = $(
+                '<li>' +
+                '<a href="#">' +
+                '<img class="contacts-list-img" src="' + UserImage + '" alt="User Image" />' +
 
-                code = $('<li class="left clearfix" id="li' + id + '">' + 
-                    '<span class="chat-img pull-left">' + 
-                    '<img src="' + UserImage + '" alt="User Avatar" class="img-circle img-sm">' +
-                    '</span>' + 
-                    '<div class="chat-body clearfix"> <div class="header_sec"> <strong class="primary-font">' + name + '</strong>' +
-                    '<strong class="pull-right">' + 
-                    date + '</strong> </div> </div></li>');
-
-                Clist = $(
-                    '<li>' +
-                    '<a href="#">' +
-                    '<img class="contacts-list-img" src="' + UserImage + '" alt="User Image" />' +
-
-                    ' <div class="contacts-list-info">' +
-                    '<span class="contacts-list-name" id="' + id + '">' + name + ' <small class="contacts-list-date pull-right">' + date + '</small> </span>' +
-                    ' <span class="contacts-list-msg">How have you been? I was...</span></div></a > </li >');
+                ' <div class="contacts-list-info">' +
+                '<span class="contacts-list-name" id="' + id + '">' + name + ' <small class="contacts-list-date pull-right">' + date + '</small> </span>' +
+                ' <span class="contacts-list-msg">How have you been? I was...</span></div></a > </li >');
 
 
-                var UserLink = $('<a id="' + id + '" class="user" >' + name + '<a>');
-                $(code).click(function () {
+            var UserLink = $('<a id="' + id + '" class="user" >' + name + '<a>');
+            $(code).click(function () {
 
-                    var id = $(UserLink).attr('id');
+                var id = $(UserLink).attr('id');
 
-                    if (userId != id) {
-                        var ctrId = 'private_' + id;
-                        OpenPrivateChatBox(chatHub, id, ctrId, name);
+                if (userId != id) {
+                    var ctrId = 'private_' + id;
+                    OpenPrivateChatBox(chatHub, id, ctrId, name);
 
-                    }
+                }
 
-                });
+            });
 
-                var link = $('<span class="contacts-list-name" id="' + id + '">');
-                $(Clist).click(function () {
+            var link = $('<span class="contacts-list-name" id="' + id + '">');
+            $(Clist).click(function () {
 
-                    var id = $(link).attr('id');
+                var id = $(link).attr('id');
 
-                    if (userId != id) {
-                        var ctrId = 'private_' + id;
-                        OpenPrivateChatBox(chatHub, id, ctrId, name);
+                if (userId != id) {
+                    var ctrId = 'private_' + id;
+                    OpenPrivateChatBox(chatHub, id, ctrId, name);
 
-                    }
+                }
 
-                });
-
-            }
+            });
+            
 
             $("#divusers").append(code);
 
