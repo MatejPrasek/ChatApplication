@@ -32,7 +32,7 @@ namespace SignalRChat
 
         }
 
-        public bool ExecuteQuery(string Query)
+        public int ExecuteNonQuery(string Query)
         {
             int j = 0;
             using (cmd = new SqlCommand(Query, con))
@@ -42,11 +42,28 @@ namespace SignalRChat
                 con.Close();
             }
 
-            if (j > 0)
-                return true;
-            else
-                return false;
+            return j;
 
+        }
+
+        public List<string> ExecuteQuery(string Query, int numberOfColumns)
+        {
+            List<string> result = new List<string>();
+            using (cmd = new SqlCommand(Query, con))
+            {
+                con.Open();
+                sdr = cmd.ExecuteReader();
+                while (sdr.Read())
+                {
+                    for(int i = 0; i< numberOfColumns; i++)
+                    {
+                        result.Add(sdr.GetValue(i).ToString());
+                    }
+                }
+                sdr.Close();
+                con.Close();
+            }
+            return result;
         }
 
         public string GetColumnVal(string Query, string ColumnName)

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -35,7 +35,7 @@ namespace SignalRChat
 
             // save message to database
             string query = "INSERT INTO Messages(Username,GroupID,Text,Time) VALUES('" + userName + "','" + 1 + "','" + message + "','" + time + "')";
-            if (!ConnC.ExecuteQuery(query))
+            if (ConnC.ExecuteNonQuery(query) == 0)
             {
                 return;
             }
@@ -45,7 +45,6 @@ namespace SignalRChat
 
             // Broad cast message
             Clients.All.messageReceived(userName, message, time, UserImg);
-
         }
 
         private void AddMessageinCache(string userName, string message, string time, string UserImg)

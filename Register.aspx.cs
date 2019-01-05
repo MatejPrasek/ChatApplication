@@ -20,7 +20,7 @@ namespace SignalRChat
             string ExistQ = "select * from Users where Username='"+txtUser.Value+"'";
             if (!ConnC.IsExist(ExistQ))
             {
-                if (ConnC.ExecuteQuery(Query))
+                if (ConnC.ExecuteNonQuery(Query) > 0)
                 {
                     ScriptManager.RegisterStartupScript(this, GetType(), "Message", "alert('Registration successful!');", true);
                     Session["UserName"] = txtUser.Value;

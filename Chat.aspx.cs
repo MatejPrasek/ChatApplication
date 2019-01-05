@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -66,7 +66,7 @@ namespace SignalRChat
                     FileInfo fi = new FileInfo(FileWithPath);
                     string ImageName = fi.Name;
                     string query = "update Users set Photo='" + ImageName + "' where Username='" + UserName + "'";
-                    if (ConnC.ExecuteQuery(query))
+                    if (ConnC.ExecuteNonQuery(query) > 0)
                         UserImage = "images/DP/" + ImageName;
                 }
             }
