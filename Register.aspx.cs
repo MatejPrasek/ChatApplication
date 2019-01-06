@@ -22,6 +22,7 @@ namespace SignalRChat
             {
                 if (ConnC.ExecuteNonQuery(Query) > 0)
                 {
+                    ConnC.ExecuteNonQuery("INSERT INTO UsersInGroups(Username,GroupID) VALUES ('" + txtUser.Value + "',1)");
                     ScriptManager.RegisterStartupScript(this, GetType(), "Message", "alert('Registration successful!');", true);
                     Session["UserName"] = txtUser.Value;
                     Response.Redirect("Chat.aspx");

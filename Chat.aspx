@@ -102,6 +102,15 @@
                 }
             });
 
+            $('#divChatWindow').on("click", "#btnLoadMore", function () {
+                $("#btnLoadMore").remove();
+
+                var count = $("#messageCounter").val().trim();
+                var toLoad = 8;
+
+                chatHub.server.getMessagesFromDb(1, toLoad, count);
+            });
+
             // Send Message on Enter Button
             $("#txtMessage").keypress(function (e) {
                 if (e.which == 13) {
@@ -150,22 +159,14 @@
 
                 $('#hdId').val(id);
                 $('#hdUserName').val(userName);
-                $('#spanUser').html(userName);
-
-                // Add All Users
-                //for (i = 0; i < allUsers.length; i++) {
-
-                //    AddUser(chatHub, allUsers[i].ConnectionId, allUsers[i].UserName, allUsers[i].UserImage, allUsers[i].LoginTime);
-                //}
-
+                $('#messageCounter').val("0");
+                
                 // Load online users
                 chatHub.server.loadOnlineUsers(userName);
 
-                // Add Existing Messages
-                for (i = 0; i < messages.length; i++) {
-                    AddMessage(messages[i].UserName, messages[i].Message, messages[i].Time, messages[i].UserImage);
+                // Load messages
+                chatHub.server.getMessagesFromDb(1, 8, 0);
 
-                }
             }
 
             // On New User Connected
@@ -335,7 +336,21 @@
                     $("#divusers").append(code);
                 }
             }
-           
+
+            chatHub.client.loadMessages = function (username, text, time, image) {
+                var i;
+                for (i = 0; i < username.length; i++) {
+                    AddMessageCode(username[i], text[i], time[i], image[i], false);
+                }
+                
+                var button = "<div class='bg-olive  text-center' id='btnLoadMore' >Load more</div>"
+                $('#divChatWindow').prepend(button);
+                
+                // Scroll to the bottom of chat
+                var scr = $("#chatScroll");
+                scr.scrollTop(scr.prop("scrollHeight"));
+            }
+
         }
 
 
@@ -381,8 +396,8 @@
 
         }
 
-        function AddMessage(userName, message, time, userimg) {
-
+        function AddMessageCode(userName, message, time, userimg, bottom) {
+            
             var CurrUser = $('#hdUserName').val();
             var Side = 'right';
             var TimeSide = 'left';
@@ -402,11 +417,24 @@
                 ' <img class="direct-chat-img" src="' + userimg + '" alt="Message User Image">' +
                 ' <div class="direct-chat-text" >' + message + '</div> </div>';
 
-            $('#divChatWindow').append(divChat);
+            incrementMessageCount();
 
-            var height = $('#divChatWindow')[0].scrollHeight;
-            $('#divChatWindow').scrollTop(height);
+            if (bottom) {
+                $('#divChatWindow').append(divChat);
+                var scr = $("#chatScroll");
+                scr.scrollTop(scr.prop("scrollHeight"));
+            }
+            else {
+                $('#divChatWindow').prepend(divChat);
+                //var scr = $("#chatScroll");
+                //scr.scrollTop(scr.prop("scrollHeight"));
+            }
+        }
 
+        function AddMessage(userName, message, time, userimg) {
+
+            AddMessageCode(userName,message,time,userimg, true)
+            
         }
 
         // Creation and Opening Private Chat Div
@@ -493,6 +521,12 @@
             $('#PriChatDiv').append($div);
         }
 
+        function incrementMessageCount() {
+            $('#messageCounter').val(function (i, oldval) {
+                return ++oldval;
+            });
+        }
+
 
     </script>
 
@@ -526,6 +560,7 @@
     <input id="hdId" type="hidden"/>
     <input id="PWCount" type="hidden" value="info"/>
     <input id="hdUserName" type="hidden"/>
+    <input id="messageCounter" type="hidden" value="0"/>
     <div class="modal fade" id="ChangePic" role="dialog">
         <div class="modal-dialog" style="width: 700px">
             <div class="modal-content">
@@ -648,7 +683,7 @@
                 </div>
             </div>
         </div><!--new_message_head-->
-        <div class="chat_area">
+        <div class="chat_area" id="chatScroll">
                 <!-- Conversations are loaded here -->
                 <div id="chat-box">
                     <!-- Conversations are loaded here -->

@@ -47,6 +47,28 @@ namespace SignalRChat
             Clients.All.messageReceived(userName, message, time, UserImg);
         }
 
+        // Load older messages from database 
+        public void GetMessagesFromDb(string groupID, int toLoad, int alreadyLoaded)
+        {
+            var data = ConnC.ExecuteQuery("SELECT* FROM(SELECT Username,Text,Time FROM Messages WHERE GroupID = '" + groupID + "' ORDER BY Time DESC OFFSET " + alreadyLoaded + " ROWS FETCH NEXT " + toLoad + " ROWS ONLY) SQ", 3);
+
+            int count = data.Count;
+
+            string[] username = new string[count/3];
+            string[] text = new string[count/3];
+            string[] time = new string[count / 3];
+            string[] photo = new string[count / 3];
+            for (int i = 0; i < count/3; i++)
+            {
+                username[i] = data[i * 3];
+                text[i] = data[i * 3 + 1];
+                time[i] = data[i * 3 + 2];
+                photo[i] = GetUserImage(username[i]);
+            }
+
+            Clients.Caller.loadMessages(username, text, time, photo);
+        }
+
         private void AddMessageinCache(string userName, string message, string time, string UserImg)
         {
             CurrentMessage.Add(new Messages { UserName = userName, Message = message, Time = time, UserImage = UserImg });
