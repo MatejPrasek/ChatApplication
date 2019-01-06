@@ -26,15 +26,26 @@ namespace SignalRChat
 
                 // send to all except caller client
                 Clients.AllExcept(id).onNewUserConnected(id, userName, UserImg, logintime);
+
+                var groups = GetUsersGroups(userName);
+                foreach(string group in groups)
+                {
+                    Groups.Add(Context.ConnectionId, group);
+                }
             }
         }
 
-        public void SendMessageToAll(string userName, string message, string time)
+        private List<string> GetUsersGroups(string username)
+        {
+            return ConnC.ExecuteQuery("SELECT GroupID FROM UsersInGroups WHERE Username = '" + username + "'", 1);
+        }
+
+        public void SendMessage(string userName, string message, string time, string groupId)
         {
            string UserImg = GetUserImage(userName);
 
             // save message to database
-            string query = "INSERT INTO Messages(Username,GroupID,Text,Time) VALUES('" + userName + "','" + 1 + "','" + message + "','" + time + "')";
+            string query = "INSERT INTO Messages(Username,GroupID,Text,Time) VALUES('" + userName + "','" + groupId + "','" + message + "','" + time + "')";
             if (ConnC.ExecuteNonQuery(query) == 0)
             {
                 return;
@@ -44,12 +55,13 @@ namespace SignalRChat
             AddMessageinCache(userName, message, time, UserImg);
 
             // Broad cast message
-            Clients.All.messageReceived(userName, message, time, UserImg);
+            Clients.Group(groupId).messageReceived(userName, message, time, UserImg, groupId);
         }
 
         // Load older messages from database 
-        public void GetMessagesFromDb(string groupID, int toLoad, int alreadyLoaded)
+        public void GetMessagesFromDb(string groupID, int alreadyLoaded)
         {
+            int toLoad = 8;
             var data = ConnC.ExecuteQuery("SELECT* FROM(SELECT Username,Text,Time FROM Messages WHERE GroupID = '" + groupID + "' ORDER BY Time DESC OFFSET " + alreadyLoaded + " ROWS FETCH NEXT " + toLoad + " ROWS ONLY) SQ", 3);
 
             int count = data.Count;
@@ -112,7 +124,13 @@ namespace SignalRChat
                 var id = Context.ConnectionId;
                 Clients.All.onUserDisconnected(id, item.UserName);
 
+                var groups = GetUsersGroups(item.UserName);
+                foreach (string group in groups)
+                {
+                    Groups.Remove(item.ConnectionId, group);
+                }
             }
+
             return base.OnDisconnected(stopCalled);
         }
 

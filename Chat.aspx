@@ -97,7 +97,7 @@
 
                     var date = GetCurrentDateTime(new Date());
 
-                    chatHub.server.sendMessageToAll(userName, msg, date);
+                    chatHub.server.sendMessage(userName, msg, date, $('#actualChatId').val());
                     $("#txtMessage").val('');
                 }
             });
@@ -106,9 +106,8 @@
                 $("#btnLoadMore").remove();
 
                 var count = $("#messageCounter").val().trim();
-                var toLoad = 8;
 
-                chatHub.server.getMessagesFromDb(1, toLoad, count);
+                chatHub.server.getMessagesFromDb($('#actualChatId').val(), count);
             });
 
             // Send Message on Enter Button
@@ -160,12 +159,13 @@
                 $('#hdId').val(id);
                 $('#hdUserName').val(userName);
                 $('#messageCounter').val("0");
+                $('#actualChatId').val("1");
                 
                 // Load online users
                 chatHub.server.loadOnlineUsers(userName);
 
                 // Load messages
-                chatHub.server.getMessagesFromDb(1, 8, 0);
+                chatHub.server.getMessagesFromDb($('#actualChatId').val(), $('#messageCounter').val());
 
             }
 
@@ -217,9 +217,9 @@
                 $('#li' + userName).remove();
             }
 
-            chatHub.client.messageReceived = function (userName, message, time, userimg) {
-
-                AddMessage(userName, message, time, userimg);
+            chatHub.client.messageReceived = function (userName, message, time, userimg, groupId) {
+                if (groupId == $('#actualChatId').val())
+                    AddMessage(userName, message, time, userimg);
 
                 // Display Message Count and Notification
                 var CurrUser1 = $('#hdUserName').val();
@@ -290,21 +290,19 @@
                 }
                 var i;
                 for (i = 0; i < groups.length; i++) {
+                    // Anonymous function to store groupId in click function
+                    (function () {
+                        var groupId = ids[i];
+                        code = $('<li class="left clearfix" id="group' + ids[i] + '">' +
+                            '<div class="chat-body clearfix"> <div class="header_sec"> <strong class="primary-font">' + groups[i] + '</strong>' +
+                            '</div> </div></li>');
 
-                    code = $('<li class="left clearfix" id="group' + ids[i] + '">' + 
-                        '<div class="chat-body clearfix"> <div class="header_sec"> <strong class="primary-font">' + groups[i] + '</strong>' +
-                        '</div> </div></li>');
+                        $(code).click(function () {
+                            ChangeChat(groupId, chatHub);
+                        });
 
-                    var GroupLink = $('<a id="' + ids[i] + '" class="user" >' + groups[i] + '<a>');
-                    $(code).click(function () {
-
-                        var id = $(GroupLink).attr('id');
-
-                        OpenPrivateChatBox(chatHub, id, ctrId, name);
-
-                    });
-
-                    $("#divusers").append(code);
+                        $("#divusers").append(code);
+                    })();
                 }
             }
 
@@ -324,12 +322,12 @@
                         '<div class="chat-body clearfix"> <div class="header_sec"> <strong class="primary-font">' + users[i] + '</strong>' +
                         '</div> </div></li>');
 
-                    var UserLink = $('<a id="' + users[i] + '" class="user" >' + users[i] + '<a>');
+                    //var UserLink = $('<a id="' + users[i] + '" class="user" >' + users[i] + '<a>');
                     $(code).click(function () {
+                        console.log("user clicked");
+                        //var id = $(UserLink).attr('id');
 
-                        var id = $(UserLink).attr('id');
-
-                        OpenPrivateChatBox(chatHub, id, ctrId, name);
+                        //OpenPrivateChatBox(chatHub, id, ctrId, name);
 
                     });
 
@@ -394,6 +392,14 @@
             
             $("#divusers").append(code);
 
+        }
+
+        function ChangeChat(chatId, chatHub) {
+            
+            $("#actualChatId").val(chatId);
+            $('#messageCounter').val("0");
+            $('#divChatWindow').empty();
+            chatHub.server.getMessagesFromDb($('#actualChatId').val(), $('#messageCounter').val());
         }
 
         function AddMessageCode(userName, message, time, userimg, bottom) {
@@ -561,6 +567,7 @@
     <input id="PWCount" type="hidden" value="info"/>
     <input id="hdUserName" type="hidden"/>
     <input id="messageCounter" type="hidden" value="0"/>
+    <input id="actualChatId" type="hidden" value="1" />
     <div class="modal fade" id="ChangePic" role="dialog">
         <div class="modal-dialog" style="width: 700px">
             <div class="modal-content">
