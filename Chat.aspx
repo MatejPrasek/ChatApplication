@@ -288,7 +288,9 @@
                 });
             }
 
-            
+            chatHub.client.selectNewChat = function (groupId, groupName) {
+                changeChat(groupId, groupName, chatHub);
+            }
         
             chatHub.client.loadAllGroups = function (groups, ids) {
                 if ($('#dropdownMenu2Text').val() != " My groups ")
@@ -308,7 +310,7 @@
                             '</div> </div></li>');
 
                         $(code).click(function () {
-                            ChangeChat(groupId, groupName, chatHub);
+                            changeChat(groupId, groupName, chatHub);
                         });
 
                         $("#divusers").append(code);
@@ -404,7 +406,7 @@
 
         }
 
-        function ChangeChat(chatId, chatName, chatHub) {
+        function changeChat(chatId, chatName, chatHub) {
             
             $("#actualChatId").val(chatId);
             $('#messageCounter').val("0");
@@ -550,6 +552,7 @@
 </head>
 
 <body>
+    <form id="newGroupForm"></form>
 <form id="form1" runat="server">
     <asp:ScriptManager ID="ScriptManager1" runat="server"></asp:ScriptManager>
     <div class="content-wrapper">
@@ -675,18 +678,15 @@
                             </a>
                             <ul class="dropdown-menu">
                                 <li class="user-footer">
-                                    <form>
-                                        <label for="newGroupName"><i class="zmdi zmdi-account material-icons-name"></i></label>
-                                        <input type="text" id="newGroupName" placeholder="Name" required="required" runat="server"/>
-                                    </form>
+                                        <input type="text" id="newGroupName" placeholder="Name" required="required" runat="server" form="newGroupForm"/>
                                 </li>
                                 <!-- Menu Footer-->
                                 <li class="user-footer">
                                     <div class="pull-left">
-                                        <a class="btn btn-danger btn-flat" data-toggle="modal" href="#">Cancel</a>
+                                        <a class="btn btn-danger btn-flat" data-toggle="dropdown" href="#">Cancel</a>
                                     </div>
                                     <div class="pull-right">
-                                        <a class="btn btn-success btn-flat" id="newGroupButton" data-toggle="modal" href="#">Create</a>
+                                        <a class="btn btn-success btn-flat" id="newGroupButton" data-toggle="dropdown" href="#">Create</a>
                                     </div>
                                 </li>
                             </ul>

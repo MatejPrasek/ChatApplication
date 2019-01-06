@@ -139,6 +139,7 @@ namespace SignalRChat
             var groupId = ConnC.ExecuteQuery("INSERT INTO Groups(Name,Admin,IsPrivateChat) OUTPUT Inserted.ID VALUES('" + groupName + "','" + username + "','False')",1).FirstOrDefault();
             InsertIntoGroup(groupId, username);
             LoadAllGroups(username);
+            Clients.Caller.selectNewChat(groupId, groupName);
         }
 
         public void InsertIntoGroup(string groupId, string username)
