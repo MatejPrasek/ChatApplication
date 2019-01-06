@@ -134,6 +134,19 @@ namespace SignalRChat
             return base.OnDisconnected(stopCalled);
         }
 
+        public void createGroup(string groupName, string username)
+        {
+            var groupId = ConnC.ExecuteQuery("INSERT INTO Groups(Name,Admin,IsPrivateChat) OUTPUT Inserted.ID VALUES('" + groupName + "','" + username + "','False')",1).FirstOrDefault();
+            InsertIntoGroup(groupId, username);
+            LoadAllGroups(username);
+        }
+
+        public void InsertIntoGroup(string groupId, string username)
+        {
+            ConnC.ExecuteNonQuery("INSERT INTO UsersInGroups(Username,GroupID) VALUES ('" + username + "','" + groupId + "')");
+            Groups.Add(Context.ConnectionId, groupId);
+        }
+
         public void LoadOnlineUsers(string username)
         {
             string[] users = new string[ConnectedUsers.Count-1];

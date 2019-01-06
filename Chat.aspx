@@ -1,4 +1,4 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="Chat.aspx.cs" Inherits="SignalRChat.Chat" %>
+<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="Chat.aspx.cs" Inherits="SignalRChat.Chat" %>
 
 <!DOCTYPE html>
 
@@ -85,6 +85,13 @@
                 chatHub.server.connect(name);
 
             }
+
+            $('#newGroupButton').click(function () {
+                var groupName = $('#newGroupName').val();
+                var userName = $('#hdUserName').val();
+                chatHub.server.createGroup(groupName, userName);
+                $('#newGroupName').val('');
+            });
 
             // Send Button Click Event
             $('#btnSendMsg').click(function () {
@@ -284,6 +291,8 @@
             
         
             chatHub.client.loadAllGroups = function (groups, ids) {
+                if ($('#dropdownMenu2Text').val() != " My groups ")
+                    return;
                 var div = document.getElementById("divusers");
                 while (div.firstChild) {
                     div.removeChild(div.firstChild);
@@ -652,11 +661,42 @@
 <div class="col-sm-9 message_section">
     <div class="row">
         <div class="new_message_head">
+
+            <!-- Add new group -->
             <div class="pull-left">
-                <button>
-                    <i class="fa fa-plus-square-o" aria-hidden="true"></i> New group
-                </button>
+                    <div class="navbar-custom-menu">
+                    <ul class="nav navbar-nav">
+                        <!-- Messages: style can be found in dropdown.less-->
+
+                        <!-- User Account: style can be found in dropdown.less -->
+                        <li class="dropdown user user-menu">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                <i class="fa fa-plus-square-o" aria-hidden="true"></i> New group
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li class="user-footer">
+                                    <form>
+                                        <label for="newGroupName"><i class="zmdi zmdi-account material-icons-name"></i></label>
+                                        <input type="text" id="newGroupName" placeholder="Name" required="required" runat="server"/>
+                                    </form>
+                                </li>
+                                <!-- Menu Footer-->
+                                <li class="user-footer">
+                                    <div class="pull-left">
+                                        <a class="btn btn-danger btn-flat" data-toggle="modal" href="#">Cancel</a>
+                                    </div>
+                                    <div class="pull-right">
+                                        <a class="btn btn-success btn-flat" id="newGroupButton" data-toggle="modal" href="#">Create</a>
+                                    </div>
+                                </li>
+                            </ul>
+                        </li>
+                        <!-- Control Sidebar Toggle Button -->
+                    </ul>
+                </div>
             </div>
+            
+            <!-- User menu -->
             <div class="pull-right">
                 <div class="navbar-custom-menu">
                     <ul class="nav navbar-nav">
@@ -682,7 +722,7 @@
                                         <a class="btn btn-default btn-flat" data-toggle="modal" href="#ChangePic">Change Picture</a>
                                     </div>
                                     <div class="pull-right">
-                                        <asp:Button ID="btnSignOut" runat="server" CssClass="btn btn-default btn-flat" Text="Sign Out" OnClick="btnSignOut_Click"/>
+                                            <asp:Button ID="btnSignOut" runat="server" CssClass="btn btn-default btn-flat" Text="Sign Out" OnClick="btnSignOut_Click"/>
                                     </div>
                                 </li>
                             </ul>
