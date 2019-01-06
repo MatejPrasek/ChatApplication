@@ -158,6 +158,9 @@
                 //    AddUser(chatHub, allUsers[i].ConnectionId, allUsers[i].UserName, allUsers[i].UserImage, allUsers[i].LoginTime);
                 //}
 
+                // Load online users
+                chatHub.server.loadOnlineUsers(userName);
+
                 // Add Existing Messages
                 for (i = 0; i < messages.length; i++) {
                     AddMessage(messages[i].UserName, messages[i].Message, messages[i].Time, messages[i].UserImage);
@@ -173,16 +176,32 @@
                 $(disc).hide();
                 $('#notificationConnected').prepend(disc);
                 $(disc).fadeIn(200).delay(2000).fadeOut(200);
+                
+                    if (document.getElementById("dropdownMenu2Text").textContent != " Online users ") {
+                        return;
+                    }
+
+                var code = $('<li class="left clearfix" id="li' + userName + '">' + 
+                        '<span class="chat-img pull-left">' + 
+                        '<img src="' + UserImage + '" alt="User Avatar" class="img-circle img-sm">' +
+                        '</span>' + 
+                        '<div class="chat-body clearfix"> <div class="header_sec"> <strong class="primary-font">' + userName + '</strong>' +
+                        '</div> </div></li>');
+
+                var UserLink = $('<a id="' + userName + '" class="user" >' + UserImage + '<a>');
+                $(code).click(function () {
+
+                    var id = $(UserLink).attr('id');
+
+                    OpenPrivateChatBox(chatHub, id, ctrId, name);
+
+                });
+
+                $("#divusers").append(code);
             }
 
             // On User Disconnected
             chatHub.client.onUserDisconnected = function (id, userName) {
-
-                //$('#li' + id).remove();
-
-                //var ctrId = 'private_' + id;
-                //$('#' + ctrId).remove();
-
 
                 var disc = $('<div class="disconnect">"' + userName + '" disconnected.</div>');
 
@@ -190,6 +209,11 @@
                 $('#notificationDisconnected').prepend(disc);
                 $(disc).fadeIn(200).delay(2000).fadeOut(200);
 
+                if (document.getElementById("dropdownMenu2Text").textContent != " Online users ") {
+                        return;
+                    }
+
+                $('#li' + userName).remove();
             }
 
             chatHub.client.messageReceived = function (userName, message, time, userimg) {
@@ -266,7 +290,7 @@
                 var i;
                 for (i = 0; i < groups.length; i++) {
 
-                    code = $('<li class="left clearfix" id="li' + ids[i] + '">' + 
+                    code = $('<li class="left clearfix" id="group' + ids[i] + '">' + 
                         '<div class="chat-body clearfix"> <div class="header_sec"> <strong class="primary-font">' + groups[i] + '</strong>' +
                         '</div> </div></li>');
 
