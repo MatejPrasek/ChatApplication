@@ -293,12 +293,13 @@
                     // Anonymous function to store groupId in click function
                     (function () {
                         var groupId = ids[i];
-                        code = $('<li class="left clearfix" id="group' + ids[i] + '">' +
-                            '<div class="chat-body clearfix"> <div class="header_sec"> <strong class="primary-font">' + groups[i] + '</strong>' +
+                        var groupName = groups[i];
+                        code = $('<li class="left clearfix" id="group' + groupId+ '">' +
+                            '<div class="chat-body clearfix"> <div class="header_sec"> <strong class="primary-font">' + groupName + '</strong>' +
                             '</div> </div></li>');
 
                         $(code).click(function () {
-                            ChangeChat(groupId, chatHub);
+                            ChangeChat(groupId, groupName, chatHub);
                         });
 
                         $("#divusers").append(code);
@@ -394,11 +395,12 @@
 
         }
 
-        function ChangeChat(chatId, chatHub) {
+        function ChangeChat(chatId, chatName, chatHub) {
             
             $("#actualChatId").val(chatId);
             $('#messageCounter').val("0");
             $('#divChatWindow').empty();
+            $('#chatName').text(chatName);
             chatHub.server.getMessagesFromDb($('#actualChatId').val(), $('#messageCounter').val());
         }
 
@@ -652,7 +654,7 @@
         <div class="new_message_head">
             <div class="pull-left">
                 <button>
-                    <i class="fa fa-plus-square-o" aria-hidden="true"></i> New Message
+                    <i class="fa fa-plus-square-o" aria-hidden="true"></i> New group
                 </button>
             </div>
             <div class="pull-right">
@@ -688,6 +690,10 @@
                         <!-- Control Sidebar Toggle Button -->
                     </ul>
                 </div>
+            </div>
+            
+            <div >
+                <h2 id="chatName" class="text-center center-block">Global</h2>
             </div>
         </div><!--new_message_head-->
         <div class="chat_area" id="chatScroll">
