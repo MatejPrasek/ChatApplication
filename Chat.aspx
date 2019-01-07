@@ -89,6 +89,10 @@
                 $('#newGroupName').val('');
             });
 
+            $('#manageGroupsButton').click(function () {
+                chatHub.server.manageGroupClick($('#actualChatId').val());
+            });
+
             // Send Button Click Event
             $('#btnSendMsg').click(function () {
 
@@ -262,18 +266,56 @@
                      // Anonymous function to store groupId in click function
                     (function () {
                         var username = users[i]
-                        code = $('<li class="left clearfix" id="li' + username + '">' +
-                            '<span class="chat-img pull-left">' +
-                            '<img src="' + photos[i] + '" alt="User Avatar" class="img-circle img-sm">' +
-                            '</span>' +
-                            '<div class="chat-body clearfix"> <div class="header_sec"> <strong class="primary-font">' + username + '</strong>' +
-                            '</div> </div></li>');
 
-                        $(code).click(function () {
-                            chatHub.server.openPrivateChat($('#hdUserName').val(), username);
-                        });
+                        addUser(username, username, photos[i], "divusers",
+                            function () {
+                                chatHub.server.openPrivateChat($('#hdUserName').val(), username);
+                            });
+                        
+                    })();
+                }
+            }
 
-                        $("#divusers").append(code);
+            chatHub.client.loadGroupMembers = function (users, photos) {
+                console.log("loading group");
+                var div = document.getElementById("kickGroupMembers");
+                while (div.firstChild) {
+                    div.removeChild(div.firstChild);
+                }
+                var i;
+                for (i = 0; i < users.length; i++) {
+                     // Anonymous function to store groupId in click function
+                    (function () {
+                        var username = users[i];
+                        var photo = photos[i];
+
+                        addUser("MG" + username, username, photo, "kickGroupMembers",
+                            function () {
+                                kickUser(username, photo, chatHub);
+                            });
+                        
+                    })();
+                }
+            }
+
+            chatHub.client.loadOtherMembers = function (users, photos) {
+                console.log("loading others");
+                var div = document.getElementById("inviteGroupMembers");
+                while (div.firstChild) {
+                    div.removeChild(div.firstChild);
+                }
+                var i;
+                for (i = 0; i < users.length; i++) {
+                     // Anonymous function to store groupId in click function
+                    (function () {
+                        var username = users[i];
+                        var photo = photos[i];
+
+                        addUser("MG" + username, username, photo, "inviteGroupMembers",
+                            function () {
+                                inviteUser(username, photo, chatHub);
+                            });
+                        
                     })();
                 }
             }
@@ -294,7 +336,39 @@
 
         }
 
+        function addUser(id, username, photo, placeId, onClickFun) {
+                        code = $('<li class="left clearfix" id="' + id + '">' +
+                            '<span class="chat-img pull-left">' +
+                            '<img src="' + photo + '" alt="User Avatar" class="img-circle img-sm">' +
+                            '</span>' +
+                            '<div class="chat-body clearfix"> <div class="header_sec"> <strong class="primary-font">' + username + '</strong>' +
+                            '</div> </div></li>');
 
+                        $(code).click(onClickFun);
+                $('#'+placeId+'').append(code);
+        }
+
+        function kickUser(username, photo, chatHub) {
+
+            chatHub.server.kickUser($('#actualChatId').val(), username);
+
+            $('#MG' + username + '').remove();
+
+            addUser("MG" + username, username, photo, "inviteGroupMembers", function () {
+                inviteUser(username, photo, chatHub);
+            });
+        }
+
+        function inviteUser(username, photo, chatHub) {
+
+            chatHub.server.inviteUser($('#actualChatId').val(), username);
+
+            $('#MG' + username + '').remove();
+
+            addUser("MG" + username, username, photo, "kickGroupMembers", function () {
+                kickUser(username, photo, chatHub);
+            });
+        }
 
         function GetCurrentDateTime(now) {
 
@@ -420,6 +494,36 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade" id="manageGroupMembers" role="dialog">
+        <div class="modal-dialog" style="width: 500px">
+            <div class="modal-content">
+                <div class="modal-header bg-light-blue-gradient with-border">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Manage group members</h4>
+                </div>
+                <div class="modal-body">
+                    <div>
+                        <div class="row">
+                           <div class="col-xs-6 with-border">
+                             <div>Invite</div>
+                               <ul class="list-unstyled member_list" id="inviteGroupMembers">
+                                
+                                    </ul>
+                           </div>
+                           <div class="col-xs-6 with-border">
+                               <div>Kick</div>
+                                    <ul class="list-unstyled member_list" id="kickGroupMembers">
+                                
+                                    </ul>
+                           </div>
+                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="Scripts/bootstrap.min.js"></script>
 <div class="main_section">
 <div class="container">
@@ -543,8 +647,13 @@
             <textarea id="txtMessage" class="form-control" placeholder="type a message"></textarea>
             <div class="clearfix"></div>
             <div class="chat_bottom">
+                <div class="row">
+                <a class="btn btn-default pull-left" data-toggle="modal" href="#manageGroupMembers" id="manageGroupsButton">
+                    Manage groups</a>
+
                 <a href="#" class="pull-right btn btn-success " id="btnSendMsg" >
                     Send</a>
+                </div>
             </div>
         </div>
     </div>

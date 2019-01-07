@@ -132,6 +132,14 @@ namespace SignalRChat
             Groups.Add(connectionId, groupId);
         }
 
+        public void RemoveFromGroup(string groupId, string username, string connectionId)
+        {
+            ConnC.ExecuteNonQuery("DELETE FROM UsersInGroups WHERE Username='" + username + "' AND GroupID='" + groupId + "'");
+            if (connectionId.Equals(string.Empty))
+                return;
+            Groups.Remove(connectionId, groupId);
+        }
+
         public void LoadOnlineUsers(string username)
         {
             string[] users = new string[ConnectedUsers.Count-1];
@@ -165,12 +173,17 @@ namespace SignalRChat
             Clients.Caller.selectNewChat(groupId, otherUser);
         }
 
+        private string GetConnectionId(string username)
+        {
+            Users other = ConnectedUsers.Where(u => u.UserName == username).FirstOrDefault();
+            return other != null ? other.ConnectionId : string.Empty;
+        }
+
         private string CreatePrivateChat(string user, string otherUser)
         {
             var groupId = ConnC.ExecuteQuery("INSERT INTO Groups(IsPrivateChat) OUTPUT Inserted.ID VALUES('True')", 1).FirstOrDefault();
             InsertIntoGroup(groupId, user, Context.ConnectionId);
-            Users other = ConnectedUsers.Where(u => u.UserName == otherUser).FirstOrDefault();
-            InsertIntoGroup(groupId, otherUser, other!=null?other.ConnectionId:string.Empty);
+            InsertIntoGroup(groupId, otherUser, GetConnectionId(otherUser));
             return groupId;
         }
 
@@ -190,6 +203,46 @@ namespace SignalRChat
             }
 
             Clients.Caller.loadAllUsers(users, photos);
+        }
+
+        public void InviteUser(string chatId, string username)
+        {
+            InsertIntoGroup(chatId, username, GetConnectionId(username));
+        }
+        public void KickUser(string chatId, string username)
+        {
+            RemoveFromGroup(chatId, username, GetConnectionId(username));
+        }
+
+        public void ManageGroupClick(string chatId)
+        {
+            var data = ConnC.ExecuteQuery("SELECT u.Username, u.Photo FROM Users u JOIN UsersInGroups ug ON u.Username = ug.Username JOIN Groups g ON g.ID = ug.GroupID WHERE ug.GroupID = '"+chatId+"'", 2);
+            int count = data.Count;
+            int j = 0;
+            string[] users = new string[count / 2];
+            string[] photos = new string[count / 2];
+            for (int i = 0; i < count; i += 2)
+            {
+                users[j] = data[i];
+                string path = data[i + 1];
+                photos[j] = "images/DP/" + (path.Equals(string.Empty) ? "dummy.png" : path);
+                j++;
+            }
+            Clients.Caller.loadGroupMembers(users, photos);
+
+            data = ConnC.ExecuteQuery("SELECT u.Username, u.Photo FROM Users u LEFT JOIN(SELECT u.Username, u.Photo FROM Users u JOIN UsersInGroups ug ON u.Username = ug.Username JOIN Groups g ON g.ID = ug.GroupID WHERE ug.GroupID = '" + chatId + "') SQ  ON SQ.Username = u.Username WHERE SQ.Username IS NULL", 2);
+            count = data.Count;
+            j = 0;
+            users = new string[count / 2];
+            photos = new string[count / 2];
+            for (int i = 0; i < count; i += 2)
+            {
+                users[j] = data[i];
+                string path = data[i + 1];
+                photos[j] = "images/DP/" + (path.Equals(string.Empty) ? "dummy.png" : path);
+                j++;
+            }
+            Clients.Caller.loadOtherMembers(users, photos);
         }
 
         public void LoadAllGroups(string username)
