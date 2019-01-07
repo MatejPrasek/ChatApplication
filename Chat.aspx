@@ -4,7 +4,7 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head runat="server">
-    <title>SignalR Chat : Chat Page</title>
+    <title>UX chat</title>
     <!------ Include the above in your HEAD tag ---------->
 
     <link href="Content/bootstrap.min.css" rel="stylesheet" />
@@ -57,7 +57,7 @@
                 if (event.explicitOriginalTarget === window) {
 
                     clearInterval(IntervalVal);
-                    document.title = 'SignalR Chat App';
+                    document.title = 'UX chat';
                 }
             }
 
@@ -227,7 +227,7 @@
                     $("#MsgCountMain").html(msgcount);
                     $("#MsgCountMain").attr("title", msgcount + ' New Messages');
                     var Notification = 'New Message From ' + userName;
-                    IntervalVal = setInterval("ShowTitleAlert('SignalR Chat App', '" + Notification + "')", 800);
+                    IntervalVal = setInterval("ShowTitleAlert('UX chat '" + Notification + "')", 800);
 
                 }
             }
@@ -387,10 +387,10 @@
         function changeChat(chatId, chatName, chatHub) {
             if ($('#isPrivateChat').val() == '1') {
                 $('#' + chatName + '').css('background-color', '');
-                $('#manageGroupMembers').css('visibility', 'hidden');
+                $('#manageGroupsButton').css('visibility', 'hidden');
             } else {
                 $('#group' + chatId + '').css('background-color', '');
-                $('#manageGroupMembers').css('visibility', 'visible');
+                $('#manageGroupsButton').css('visibility', 'visible');
             }
             $("#actualChatId").val(chatId);
             $('#messageCounter').val("0");
