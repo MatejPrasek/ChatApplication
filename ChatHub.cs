@@ -137,15 +137,17 @@ namespace SignalRChat
         public void createGroup(string groupName, string username)
         {
             var groupId = ConnC.ExecuteQuery("INSERT INTO Groups(Name,Admin,IsPrivateChat) OUTPUT Inserted.ID VALUES('" + groupName + "','" + username + "','False')",1).FirstOrDefault();
-            InsertIntoGroup(groupId, username);
+            InsertIntoGroup(groupId, username, Context.ConnectionId);
             LoadAllGroups(username);
             Clients.Caller.selectNewChat(groupId, groupName);
         }
 
-        public void InsertIntoGroup(string groupId, string username)
+        public void InsertIntoGroup(string groupId, string username, string connectionId)
         {
             ConnC.ExecuteNonQuery("INSERT INTO UsersInGroups(Username,GroupID) VALUES ('" + username + "','" + groupId + "')");
-            Groups.Add(Context.ConnectionId, groupId);
+            if (connectionId.Equals(string.Empty))
+                return;
+            Groups.Add(connectionId, groupId);
         }
 
         public void LoadOnlineUsers(string username)
@@ -162,6 +164,32 @@ namespace SignalRChat
                 j++;
             }
             Clients.Caller.loadAllUsers(users, photos);
+        }
+
+        public void OpenPrivateChat(string user, string otherUser)
+        {
+            // Get ID of PRIVATE chat of two users
+            string querry = "SELECT GroupID FROM(" +
+                        "SELECT Username, GroupID FROM Groups g JOIN UsersInGroups ug ON g.ID = ug.GroupID WHERE g.IsPrivateChat = 'True') SQ " +
+                        "WHERE Username = '" + user + "' OR Username = '" + otherUser + "'  GROUP BY GroupID HAVING COUNT(*) > 1";
+
+            string groupId = ConnC.ExecuteQuery(querry, 1).FirstOrDefault();
+
+            if (groupId == null)
+            {
+                groupId = CreatePrivateChat(user, otherUser);
+            }
+
+            Clients.Caller.selectNewChat(groupId, otherUser);
+        }
+
+        private string CreatePrivateChat(string user, string otherUser)
+        {
+            var groupId = ConnC.ExecuteQuery("INSERT INTO Groups(IsPrivateChat) OUTPUT Inserted.ID VALUES('True')", 1).FirstOrDefault();
+            InsertIntoGroup(groupId, user, Context.ConnectionId);
+            Users other = ConnectedUsers.Where(u => u.UserName == otherUser).FirstOrDefault();
+            InsertIntoGroup(groupId, otherUser, other!=null?other.ConnectionId:string.Empty);
+            return groupId;
         }
 
         public void LoadAllUsers(string username)

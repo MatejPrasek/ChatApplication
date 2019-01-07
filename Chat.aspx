@@ -189,23 +189,7 @@
                         return;
                     }
 
-                var code = $('<li class="left clearfix" id="li' + userName + '">' + 
-                        '<span class="chat-img pull-left">' + 
-                        '<img src="' + UserImage + '" alt="User Avatar" class="img-circle img-sm">' +
-                        '</span>' + 
-                        '<div class="chat-body clearfix"> <div class="header_sec"> <strong class="primary-font">' + userName + '</strong>' +
-                        '</div> </div></li>');
-
-                var UserLink = $('<a id="' + userName + '" class="user" >' + UserImage + '<a>');
-                $(code).click(function () {
-
-                    var id = $(UserLink).attr('id');
-
-                    OpenPrivateChatBox(chatHub, id, ctrId, name);
-
-                });
-
-                $("#divusers").append(code);
+                chatHub.client.loadAllUsers([ userName ], [ UserImage ] );
             }
 
             // On User Disconnected
@@ -326,24 +310,22 @@
                 }
                 var i;
                 for (i = 0; i < users.length; i++) {
+                     // Anonymous function to store groupId in click function
+                    (function () {
+                        var username = users[i]
+                        code = $('<li class="left clearfix" id="li' + username + '">' +
+                            '<span class="chat-img pull-left">' +
+                            '<img src="' + photos[i] + '" alt="User Avatar" class="img-circle img-sm">' +
+                            '</span>' +
+                            '<div class="chat-body clearfix"> <div class="header_sec"> <strong class="primary-font">' + username + '</strong>' +
+                            '</div> </div></li>');
 
-                    code = $('<li class="left clearfix" id="li' + users[i] + '">' + 
-                        '<span class="chat-img pull-left">' + 
-                        '<img src="' + photos[i] + '" alt="User Avatar" class="img-circle img-sm">' +
-                        '</span>' + 
-                        '<div class="chat-body clearfix"> <div class="header_sec"> <strong class="primary-font">' + users[i] + '</strong>' +
-                        '</div> </div></li>');
+                        $(code).click(function () {
+                            chatHub.server.openPrivateChat($('#hdUserName').val(), username);
+                        });
 
-                    //var UserLink = $('<a id="' + users[i] + '" class="user" >' + users[i] + '<a>');
-                    $(code).click(function () {
-                        console.log("user clicked");
-                        //var id = $(UserLink).attr('id');
-
-                        //OpenPrivateChatBox(chatHub, id, ctrId, name);
-
-                    });
-
-                    $("#divusers").append(code);
+                        $("#divusers").append(code);
+                    })();
                 }
             }
 
@@ -414,6 +396,7 @@
             $('#chatName').text(chatName);
             chatHub.server.getMessagesFromDb($('#actualChatId').val(), $('#messageCounter').val());
         }
+        
 
         function AddMessageCode(userName, message, time, userimg, bottom) {
             
