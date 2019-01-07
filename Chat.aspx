@@ -104,7 +104,7 @@
 
                     var date = GetCurrentDateTime(new Date());
 
-                    chatHub.server.sendMessage(userName, msg, date, $('#actualChatId').val());
+                    chatHub.server.sendMessage(userName, msg, date, $('#actualChatId').val(), $('#isPrivateChat').val());
                     $("#txtMessage").val('');
                 }
             });
@@ -127,7 +127,7 @@
              // Changing text of dropdown
             $(function () {
                 $("#allUsers").click(function () {
-                
+                    $("#isPrivateChat").val("1");
                     $("#dropdownMenu2Text").text($(this).text());
                     $("#dropdownMenu2Text").val($(this).text());
                     chatHub.server.loadAllUsers(name);
@@ -137,7 +137,7 @@
 
             $(function () {
                 $("#onlineUsers").click(function () {
-                
+                    $("#isPrivateChat").val("1");                
                     $("#dropdownMenu2Text").text($(this).text());
                     $("#dropdownMenu2Text").val($(this).text());
                     chatHub.server.loadOnlineUsers(name);
@@ -148,7 +148,7 @@
 
             $(function () {
                 $("#myGroups").click(function () {
-                
+                    $("#isPrivateChat").val("0");                
                     $("#dropdownMenu2Text").text($(this).text());
                     $("#dropdownMenu2Text").val($(this).text());
                     chatHub.server.loadAllGroups(name);
@@ -204,13 +204,20 @@
                         return;
                     }
 
-                $('#li' + userName).remove();
+                $('#' + userName).remove();
             }
 
-            chatHub.client.messageReceived = function (userName, message, time, userimg, groupId) {
-                if (groupId == $('#actualChatId').val())
+            chatHub.client.messageReceived = function (userName, message, time, userimg, groupId, isPrivate) {
+                var actualChat = $('#actualChatId')
+                if (groupId == actualChat.val())
                     AddMessage(userName, message, time, userimg);
-
+                else {
+                    if (isPrivate == '1') {
+                        $('#' + userName + '').css('background-color', 'red');
+                    } else {
+                        $('#group' + groupId + '').css('background-color', 'red');
+                    }
+                }
                 // Display Message Count and Notification
                 var CurrUser1 = $('#hdUserName').val();
                 if (CurrUser1 != userName) {
@@ -378,7 +385,13 @@
         }
 
         function changeChat(chatId, chatName, chatHub) {
-            
+            if ($('#isPrivateChat').val() == '1') {
+                $('#' + chatName + '').css('background-color', '');
+                $('#manageGroupMembers').css('visibility', 'hidden');
+            } else {
+                $('#group' + chatId + '').css('background-color', '');
+                $('#manageGroupMembers').css('visibility', 'visible');
+            }
             $("#actualChatId").val(chatId);
             $('#messageCounter').val("0");
             $('#divChatWindow').empty();
@@ -449,6 +462,7 @@
     <input id="hdUserName" type="hidden"/>
     <input id="messageCounter" type="hidden" value="0"/>
     <input id="actualChatId" type="hidden" value="1" />
+    <input id="isPrivateChat" type="hidden" value="0" />
     <div class="modal fade" id="ChangePic" role="dialog">
         <div class="modal-dialog" style="width: 700px">
             <div class="modal-content">
@@ -649,7 +663,7 @@
             <div class="chat_bottom">
                 <div class="row">
                 <a class="btn btn-default pull-left" data-toggle="modal" href="#manageGroupMembers" id="manageGroupsButton">
-                    Manage groups</a>
+                    Manage group</a>
 
                 <a href="#" class="pull-right btn btn-success " id="btnSendMsg" >
                     Send</a>

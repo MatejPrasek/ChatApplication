@@ -39,7 +39,7 @@ namespace SignalRChat
             return ConnC.ExecuteQuery("SELECT GroupID FROM UsersInGroups WHERE Username = '" + username + "'", 1);
         }
 
-        public void SendMessage(string userName, string message, string time, string groupId)
+        public void SendMessage(string userName, string message, string time, string groupId, string isPrivate)
         {
            string UserImg = GetUserImage(userName);
 
@@ -51,7 +51,7 @@ namespace SignalRChat
             }
 
             // Broadcast message
-            Clients.Group(groupId).messageReceived(userName, message, time, UserImg, groupId);
+            Clients.Group(groupId).messageReceived(userName, message, time, UserImg, groupId, isPrivate);
         }
 
         // Load older messages from database 
