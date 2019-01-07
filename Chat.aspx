@@ -5,10 +5,6 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head runat="server">
     <title>SignalR Chat : Chat Page</title>
-    
-    <%--<link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap.min.css" rel="stylesheet"/>--%>
-    <%--<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>--%>
-<%--    <script src="//code.jquery.com/jquery-1.11.1.min.js"></script>--%>
     <!------ Include the above in your HEAD tag ---------->
 
     <link href="Content/bootstrap.min.css" rel="stylesheet" />
@@ -161,7 +157,7 @@
 
 
             // Calls when user successfully logged in
-            chatHub.client.onConnected = function (id, userName, allUsers, messages, times) {
+            chatHub.client.onConnected = function (id, userName) {
 
                 $('#hdId').val(id);
                 $('#hdUserName').val(userName);
@@ -177,8 +173,7 @@
             }
 
             // On New User Connected
-            chatHub.client.onNewUserConnected = function (id, userName, UserImage, loginDate) {
-                //AddUser(chatHub, id, userName, UserImage, loginDate);
+            chatHub.client.onNewUserConnected = function (userName, UserImage) {
                 var disc = $('<div class="disconnect">"' + userName + '" connected.</div>');
 
                 $(disc).hide();
@@ -193,7 +188,7 @@
             }
 
             // On User Disconnected
-            chatHub.client.onUserDisconnected = function (id, userName) {
+            chatHub.client.onUserDisconnected = function (userName) {
 
                 var disc = $('<div class="disconnect">"' + userName + '" disconnected.</div>');
 
@@ -224,52 +219,6 @@
                     IntervalVal = setInterval("ShowTitleAlert('SignalR Chat App', '" + Notification + "')", 800);
 
                 }
-            }
-
-
-            chatHub.client.sendPrivateMessage = function (windowId, fromUserName, message, userimg, CurrentDateTime) {
-
-                var ctrId = 'private_' + windowId;
-                if ($('#' + ctrId).length == 0) {
-
-                    OpenPrivateChatBox(chatHub, windowId, ctrId, fromUserName, userimg);
-
-                }
-
-                var CurrUser = $('#hdUserName').val();
-                var Side = 'right';
-                var TimeSide = 'left';
-
-                if (CurrUser == fromUserName) {
-                    Side = 'left';
-                    TimeSide = 'right';
-
-                }
-                else {
-                    var Notification = 'New Message From ' + fromUserName;
-                    IntervalVal = setInterval("ShowTitleAlert('SignalR Chat App', '" + Notification + "')", 800);
-
-                    var msgcount = $('#' + ctrId).find('#MsgCountP').html();
-                    msgcount++;
-                    $('#' + ctrId).find('#MsgCountP').html(msgcount);
-                    $('#' + ctrId).find('#MsgCountP').attr("title", msgcount + ' New Messages');
-                }
-
-                var divChatP = '<div class="direct-chat-msg ' + Side + '">' +
-                    '<div class="direct-chat-info clearfix">' +
-                    '<span class="direct-chat-name pull-' + Side + '">' + fromUserName + '</span>' +
-                    '<span class="direct-chat-timestamp pull-' + TimeSide + '"">' + CurrentDateTime + '</span>' +
-                    '</div>' +
-
-                    ' <img class="direct-chat-img" src="' + userimg + '" alt="Message User Image">' +
-                    ' <div class="direct-chat-text" >' + message + '</div> </div>';
-
-                $('#' + ctrId).find('#divMessage').append(divChatP);
-
-                var htt = $('#' + ctrId).find('#divMessage')[0].scrollHeight;
-                $('#' + ctrId).find('#divMessage').slimScroll({
-                    height: htt
-                });
             }
 
             chatHub.client.selectNewChat = function (groupId, groupName) {
@@ -349,43 +298,9 @@
 
         function GetCurrentDateTime(now) {
 
-            var localdate = dateFormat(now, "yyyy-mm-dd HH:MM:ss");
+            var localdate = dateFormat(now, "d. m. yyyy H:MM:ss");
 
             return localdate;
-        }
-
-        function AddUser(chatHub, id, name, UserImage, date) {
-
-            var userId = $('#hdId').val();
-
-            var code;
-            if (userId == id) {
-                return;
-            }
-            
-            code = $('<li class="left clearfix" id="li' + id + '">' + 
-                '<span class="chat-img pull-left">' + 
-                '<img src="' + UserImage + '" alt="User Avatar" class="img-circle img-sm">' +
-                '</span>' + 
-                '<div class="chat-body clearfix"> <div class="header_sec"> <strong class="primary-font">' + name + '</strong>' +
-                '<strong class="pull-right">' + 
-                date + '</strong> </div> </div></li>');
-
-            var UserLink = $('<a id="' + id + '" class="user" >' + name + '<a>');
-            $(code).click(function () {
-
-                var id = $(UserLink).attr('id');
-
-                if (userId != id) {
-                    var ctrId = 'private_' + id;
-                    OpenPrivateChatBox(chatHub, id, ctrId, name);
-
-                }
-
-            });
-            
-            $("#divusers").append(code);
-
         }
 
         function changeChat(chatId, chatName, chatHub) {
@@ -439,90 +354,6 @@
             
         }
 
-        // Creation and Opening Private Chat Div
-        function OpenPrivateChatBox(chatHub, userId, ctrId, userName) {
-
-            var PWClass = $('#PWCount').val();
-
-            if ($('#PWCount').val() == 'info')
-                PWClass = 'danger';
-            else if ($('#PWCount').val() == 'danger')
-                PWClass = 'warning';
-            else
-                PWClass = 'info';
-
-            $('#PWCount').val(PWClass);
-            var div1 = ' <div class="col-md-4"> <div  id="' + ctrId + '" class="box box-solid box-' + PWClass + ' direct-chat direct-chat-' + PWClass + '">' +
-                '<div class="box-header with-border">' +
-                ' <h3 class="box-title">' + userName + '</h3>' +
-
-                ' <div class="box-tools pull-right">' +
-                ' <span data-toggle="tooltip" id="MsgCountP" title="0 New Messages" class="badge bg-' + PWClass + '">0</span>' +
-                ' <button type="button" class="btn btn-box-tool" data-widget="collapse">' +
-                '    <i class="fa fa-minus"></i>' +
-                '  </button>' +
-                '  <button id="imgDelete" type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button></div></div>' +
-
-                ' <div class="box-body">' +
-                ' <div id="divMessage" class="direct-chat-messages">' +
-
-                ' </div>' +
-
-                '  </div>' +
-                '  <div class="box-footer">' +
-
-
-                '    <input type="text" id="txtPrivateMessage" name="message" placeholder="Type Message ..." class="form-control"  />' +
-
-                '  <div class="input-group">' +
-                '    <input type="text" name="message" placeholder="Type Message ..." class="form-control" style="visibility:hidden;" />' +
-                '   <span class="input-group-btn">' +
-                '          <input type="button" id="btnSendMessage" class="btn btn-' + PWClass + ' btn-flat" value="send" />' +
-                '   </span>' +
-                '  </div>' +
-
-                ' </div>' +
-                ' </div></div>';
-
-
-
-            var $div = $(div1);
-
-            // Closing Private Chat Box
-            $div.find('#imgDelete').click(function () {
-                $('#' + ctrId).remove();
-            });
-
-            // Send Button event in Private Chat
-            $div.find("#btnSendMessage").click(function () {
-
-                $textBox = $div.find("#txtPrivateMessage");
-
-                var msg = $textBox.val();
-                if (msg.length > 0) {
-                    chatHub.server.sendPrivateMessage(userId, msg);
-                    $textBox.val('');
-                }
-            });
-
-            // Text Box event on Enter Button
-            $div.find("#txtPrivateMessage").keypress(function (e) {
-                if (e.which == 13) {
-                    $div.find("#btnSendMessage").click();
-                }
-            });
-
-            // Clear Message Count on Mouse over           
-            $div.find("#divMessage").mouseover(function () {
-
-                $("#MsgCountP").html('0');
-                $("#MsgCountP").attr("title", '0 New Messages');
-            });
-
-            // Append private chat div inside the main div
-            $('#PriChatDiv').append($div);
-        }
-
         function incrementMessageCount() {
             $('#messageCounter').val(function (i, oldval) {
                 return ++oldval;
@@ -538,27 +369,6 @@
     <form id="newGroupForm"></form>
 <form id="form1" runat="server">
     <asp:ScriptManager ID="ScriptManager1" runat="server"></asp:ScriptManager>
-    <div class="content-wrapper">
-        <div class="row">
-           
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="row" id="PriChatDiv">
-                    </div>
-                    <textarea class="form-control" style="visibility: hidden;"></textarea>
-                    <!--/.private-chat -->
-                </div>
-            </div>
-
-            <!-- /.col -->
-
-
-            <!-- /.col -->
-
-            <!-- /.col -->
-        </div>
-        <!-- /.row -->
-    </div>
     <span id="time"></span>
     <input id="hdId" type="hidden"/>
     <input id="PWCount" type="hidden" value="info"/>
@@ -611,7 +421,6 @@
         </div>
     </div>
     <script src="Scripts/bootstrap.min.js"></script>
-<%--<script src="https://use.fontawesome.com/45e03a14ce.js"></script>--%>
 <div class="main_section">
 <div class="container">
     <div id="notificationDisconnected" class="bg-danger text-center"></div>
